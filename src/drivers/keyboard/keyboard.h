@@ -14,6 +14,7 @@ struct keyboard {
     uint8_t left_shift_pressed;
     uint8_t right_shift_pressed;
     uint8_t intro_buffered;
+    uint8_t index;
 };
 
 void init_keyboard();
