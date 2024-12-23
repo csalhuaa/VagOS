@@ -1,5 +1,7 @@
 #include "keyboard.h"
 #include "../../util/string.h"
+#include "../../apps/console.h"
+#include "../../apps/integrate.h"
 #include "../../util/printf.h"
 #include "../../memory/heap.h"
 #include <stdlib.h>
@@ -50,19 +52,21 @@ void init_keyboard() {
 
 void command(char* buffer, uint8_t size) {
     if (strncmp(buffer, "help", size) == 0) {
-        printf("Available commands:\n");
-        printf("help - Display this message\n");
-        printf("clear - Clear the screen\n");
-        printf("echo - Echo a message\n");
-        printf("exit - Exit the shell\n");
+        system_printf("Available commands:\n");
+        system_printf("help - Display this message\n");
+        system_printf("clear - Clear the screen\n");
+        system_printf("echo - Echo a message\n");
+        system_printf("exit - Exit the shell\n");
     } else if (!strcmp(buffer, "clear")) {
-        printf("\033[2J\033[1;1H");
+        system_printf("\033[2J\033[1;1H");
     } else if (!strcmp(buffer, "echo")) {
-        printf("Enter a message: ");
+        system_printf("Enter a message: ");
         halt_until_enter();
-        printf("You entered: %s\n", keyboardInput);
+        system_printf("You entered: ");
+        system_printf(keyboardInput);
+        system_printf("\n");
     } else if (!strcmp(buffer, "exit")) {
-        printf("Exiting...\n");
+        system_printf("Exiting...\n");
         halt_until_enter();
         // exit(0);
     } else {
@@ -94,7 +98,7 @@ void handle_keyboard(uint8_t scancode) {
     switch(scancode) {
         case Spacebar:
             addInput(' ');
-            printf(" ");
+            user_input(" ");
             return;
         case LeftShift:
             keyboard->left_shift_pressed = 1;
@@ -111,20 +115,25 @@ void handle_keyboard(uint8_t scancode) {
         case Enter:
             // keyboardInput[keyboard->index] = ' ';
             keyboard->intro_buffered = 1;
-            printf("\n");
-            command(keyboardInput, keyboard->index++);
+            system_printf("\n");
+            // command(keyboardInput, keyboard->index++);
+            execute_command(keyboardInput);
+            resetInput();
             keyboard->index = 0;
+            user_printf("> ");
             return;
         case Backspace:
-            backInput();
-            printf("\b \b");
+            if ( keyboard-> index > 0){
+                backInput();
+                user_input("\b \b");
+            }
             return;
     }
 
     char ascii = translate(scancode, keyboard->left_shift_pressed || keyboard->right_shift_pressed);
     if (ascii != 0) {
         addInput(ascii);
-        printf("%c", ascii);
+        user_input(&ascii);
 
     }
 }

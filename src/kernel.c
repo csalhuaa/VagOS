@@ -7,6 +7,7 @@
 #include "drivers/tty/tty_interface.h"
 #include "vfs/vfs_interface.h"
 #include "util/printf.h"
+#include "apps/integrate.h"
 
 void intro_handler(void* ttyb, uint8_t event) {
     (void)(ttyb);
@@ -65,6 +66,7 @@ void _start(void) {
     pseudo_ps();
     tty_add_subscriber("ttya", intro_handler);
     
+    init_integration();
     halt();
 
 }
